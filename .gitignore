@@ -17,6 +17,9 @@ next-env.d.ts
 # graphify knowledge-graph artifacts (generated)
 graphify-out/
 
+# Supabase migrations kept local-only (not pushed to GitHub)
+pia_app/supabase/
+
 # Logs
 *.log
 npm-debug.log*
