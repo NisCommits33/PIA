@@ -71,3 +71,10 @@ export function formatBs({ year, month, day }: BsParts): string {
 export function formatBsMonth({ year, month }: BsMonth): string {
   return `${bsMonthName(month)} ${year}`;
 }
+
+/** Step a BS year+month by ±N months, rolling the year over as needed. */
+export function stepBsMonth({ year, month }: BsMonth, delta: number): BsMonth {
+  // Convert to a 0-based absolute month index, shift, convert back.
+  const index = year * 12 + (month - 1) + delta;
+  return { year: Math.floor(index / 12), month: (index % 12) + 1 };
+}

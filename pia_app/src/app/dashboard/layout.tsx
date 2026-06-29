@@ -1,4 +1,5 @@
-import { Flame } from "lucide-react";
+import Link from "next/link";
+import { Flame, CircleUser } from "lucide-react";
 
 import { requireOnboardedUser, isMessAdmin } from "@/lib/roles";
 import { signOut } from "@/lib/session-actions";
@@ -33,7 +34,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (admin) {
     nav.push({ href: "/dashboard/staff", label: "Staff", icon: "staff" });
   }
-  nav.push({ href: "/dashboard/profile", label: "Profile", icon: "settings" });
+  // Read-only mess transparency — visible to everyone. (Profile lives in the header.)
+  nav.push({ href: "/dashboard/mess-book", label: "Mess book", icon: "messbook" });
 
   return (
     <ToastProvider>
@@ -47,10 +49,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <span className="text-lg font-bold tracking-tight text-foreground">Station Ops</span>
               <Badge tone="accent">{roleLabel(ctx.roles)}</Badge>
             </div>
-            <div className="flex items-center gap-3 text-sm">
-              <span className="hidden text-muted sm:inline">
-                {ctx.profile?.full_name ?? ctx.email}
-              </span>
+            <div className="flex items-center gap-2 text-sm">
+              <Link
+                href="/dashboard/profile"
+                aria-label="Your profile"
+                className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-muted transition-colors hover:bg-surface-muted hover:text-foreground"
+              >
+                <CircleUser aria-hidden className="size-5" />
+                <span className="hidden sm:inline">{ctx.profile?.full_name ?? ctx.email}</span>
+              </Link>
               <form action={signOut}>
                 <Button type="submit" variant="secondary" size="sm">
                   Sign out

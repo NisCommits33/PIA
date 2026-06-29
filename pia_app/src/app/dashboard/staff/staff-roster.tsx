@@ -1,7 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Users, ShieldPlus, ShieldMinus, Power, PowerOff } from "lucide-react";
+import {
+  Users,
+  ShieldPlus,
+  ShieldMinus,
+  Power,
+  PowerOff,
+  Eye,
+  EyeOff,
+  Copy,
+  Check,
+} from "lucide-react";
 
 import type { AppRole } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +20,59 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ActionButton } from "@/components/ui/action-button";
 import { FilterToolbar } from "@/components/filter-toolbar";
 import { setRole, setActive } from "./actions";
+
+/** The default login password for an account, derived from its username. */
+function defaultPassword(username: string): string {
+  return `${username}2026`;
+}
+
+/** Super-admin-only reveal/copy control for an account's default password. */
+function PasswordReveal({ value }: { value: string }) {
+  const [shown, setShown] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard unavailable — ignore */
+    }
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1">
+      <code className="rounded bg-surface-muted px-1.5 py-0.5 font-mono text-foreground">
+        {shown ? value : "••••••••"}
+      </code>
+      <button
+        type="button"
+        onClick={() => setShown((s) => !s)}
+        aria-label={shown ? "Hide password" : "Show password"}
+        className="rounded p-0.5 text-muted transition-colors hover:text-foreground"
+      >
+        {shown ? (
+          <EyeOff aria-hidden className="size-3.5" />
+        ) : (
+          <Eye aria-hidden className="size-3.5" />
+        )}
+      </button>
+      <button
+        type="button"
+        onClick={copy}
+        aria-label="Copy password"
+        className="rounded p-0.5 text-muted transition-colors hover:text-foreground"
+      >
+        {copied ? (
+          <Check aria-hidden className="size-3.5 text-success" />
+        ) : (
+          <Copy aria-hidden className="size-3.5" />
+        )}
+      </button>
+    </span>
+  );
+}
 
 export type StaffRow = {
   id: string;
@@ -124,6 +187,19 @@ export function StaffRoster({
                 <p className="mt-0.5 text-xs text-muted">
                   {p.username} · {p.deptLabel}
                 </p>
+                {canManageRoles && (
+                  <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+                    <span>
+                      User:{" "}
+                      <code className="rounded bg-surface-muted px-1.5 py-0.5 font-mono text-foreground">
+                        {p.username}
+                      </code>
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      Pass: <PasswordReveal value={defaultPassword(p.username)} />
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center gap-2">

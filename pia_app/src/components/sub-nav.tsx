@@ -12,6 +12,7 @@ import {
   CalendarDays,
   Users,
   Settings,
+  BookOpen,
 } from "lucide-react";
 
 import { cn } from "@/lib/cn";
@@ -28,6 +29,7 @@ export const ICONS = {
   leave: CalendarDays,
   staff: Users,
   settings: Settings,
+  messbook: BookOpen,
 } as const;
 
 export type NavIcon = keyof typeof ICONS;

@@ -24,37 +24,18 @@ export function CreateAccountForm() {
 
   return (
     <form ref={formRef} action={action} className="flex flex-col gap-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field
-          label="Full name"
-          htmlFor="full_name"
-          helper="Optional — they can set it at first login."
-        >
-          <Input id="full_name" name="full_name" autoComplete="off" />
-        </Field>
-        <Field
-          label="Username"
-          htmlFor="username"
-          required
-          helper="Used to sign in (e.g. ram.bdr)."
-        >
-          <Input id="username" name="username" autoComplete="off" required placeholder="ram.bdr" />
-        </Field>
-      </div>
-
       <Field
-        label="Temporary password"
-        htmlFor="password"
+        label="Staff name"
+        htmlFor="full_name"
         required
-        helper="At least 6 characters. Share it with the staff member to change later."
+        helper="The login is created automatically — e.g. “Ram Bahadur” → username rambahadur, password rambahadur2026."
       >
         <Input
-          id="password"
-          name="password"
-          type="text"
+          id="full_name"
+          name="full_name"
           autoComplete="off"
           required
-          minLength={6}
+          placeholder="e.g. Ram Bahadur"
         />
       </Field>
 

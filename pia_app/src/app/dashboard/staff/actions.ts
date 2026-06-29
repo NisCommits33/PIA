@@ -12,23 +12,25 @@ function revalidateStaff() {
   revalidatePath("/dashboard/staff");
 }
 
-/** Create a new staff account (mess_admin or super_admin). Login is username@pia.local. */
+/**
+ * Create a new staff account (mess_admin or super_admin). The admin enters only
+ * the staff member's name; the login is derived from it:
+ *   "Ram Bahadur" → rambahadur@pia.local / password rambahadur2026
+ */
 export async function createStaffAccount(
   _prev: CreateState,
   formData: FormData,
 ): Promise<CreateState> {
   await requireMessAdmin();
 
-  const username = String(formData.get("username") ?? "")
-    .trim()
-    .toLowerCase();
-  const password = String(formData.get("password") ?? "");
   const fullName = String(formData.get("full_name") ?? "").trim();
+  // Username = the name lowercased with everything but letters/numbers stripped.
+  const username = fullName.toLowerCase().replace(/[^a-z0-9]/g, "");
 
-  if (!/^[a-z0-9._-]{3,}$/.test(username)) {
-    return { error: "Username: 3+ chars, letters/numbers/._- only (no spaces or @)." };
-  }
-  if (password.length < 6) return { error: "Password must be at least 6 characters." };
+  if (fullName.length < 2) return { error: "Enter the staff member's name." };
+  if (username.length < 3) return { error: "Name needs at least 3 letters or numbers." };
+
+  const password = `${username}2026`;
 
   const admin = createAdminClient();
   const { data, error } = await admin.auth.admin.createUser({
@@ -39,16 +41,18 @@ export async function createStaffAccount(
 
   if (error || !data.user) {
     const taken = /already|registered|exists/i.test(error?.message ?? "");
-    return { error: taken ? "That username is already taken." : "Could not create the account." };
+    return {
+      error: taken
+        ? `An account for “${fullName}” already exists (username ${username}).`
+        : "Could not create the account.",
+    };
   }
 
-  // The new-user trigger created the profile + staff role; set the name if given.
-  if (fullName) {
-    await admin.from("profiles").update({ full_name: fullName }).eq("id", data.user.id);
-  }
+  // The new-user trigger created the profile + staff role; set the name.
+  await admin.from("profiles").update({ full_name: fullName }).eq("id", data.user.id);
 
   revalidateStaff();
-  return { ok: `Account “${username}” created.` };
+  return { ok: `Account created — username ${username}, password ${password}.` };
 }
 
 /** Grant or revoke a role (super_admin only). */
