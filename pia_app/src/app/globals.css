@@ -1,26 +1,89 @@
 @import "tailwindcss";
 
+/*
+  Station Ops design system — "Data-Dense Dashboard" (light mode).
+  Tokens are defined as CSS variables on :root, then mapped into Tailwind v4's
+  theme so semantic utilities (bg-primary, text-muted, border-border, …) work.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f1f5f9; /* slate-100 — app canvas */
+  --surface: #ffffff; /* cards, sheets */
+  --surface-muted: #f8fafc; /* subtle fills, table headers */
+  --foreground: #0f172a; /* slate-900 — primary text */
+  --muted: #64748b; /* slate-500 — secondary text */
+  --border: #e2e8f0; /* slate-200 */
+
+  --primary: #1e40af; /* blue-800 */
+  --primary-hover: #1e3a8a; /* blue-900 */
+  --primary-soft: #eff6ff; /* blue-50 */
+  --on-primary: #ffffff;
+
+  --accent: #b45309; /* amber-700 — brand accent (AA on white) */
+  --accent-soft: #fef3c7; /* amber-100 */
+
+  --success: #047857; /* emerald-700 — refund / positive */
+  --success-soft: #ecfdf5;
+  --danger: #b91c1c; /* red-700 — owed / destructive */
+  --danger-soft: #fef2f2;
+
+  --ring: #2563eb; /* blue-600 focus ring */
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-on-primary: var(--on-primary);
+
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-fira-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-fira-code), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Consistent, visible keyboard focus across all interactive elements. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Numeric/data values: tabular figures so columns don't jitter. */
+  .nums {
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
