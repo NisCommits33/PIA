@@ -1,4 +1,4 @@
-import { ClipboardCheck, Check, X, BadgeCheck, Coins, Clock } from "lucide-react";
+import { Coins, Clock } from "lucide-react";
 
 import { requireMessAdmin } from "@/lib/roles";
 import { createClient } from "@/utils/supabase/server";
@@ -9,12 +9,8 @@ import type { ExpenseStatus } from "@/lib/types";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader } from "@/components/ui/card";
 import { StatCard } from "@/components/ui/stat-card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/empty-state";
-import { ExpenseInfoTrigger, type ExpenseDetail } from "@/components/expense-detail";
-import { ExpenseAdminActions } from "./expense-admin-actions";
-import { approveExpense, rejectExpense, markReimbursed } from "./actions";
+import { type ExpenseDetail } from "@/components/expense-detail";
+import { ExpenseReviewList, type ExpenseReviewRow } from "./expense-review-list";
 
 type ExpenseRow = {
   id: string;
@@ -76,21 +72,38 @@ export default async function ReviewExpensesPage() {
     .reduce((sum, e) => sum + Number(e.amount), 0);
   const pendingCount = expenses.filter((e) => e.status === "pending").length;
 
-  const toDetail = (e: ExpenseRow): ExpenseDetail => {
+  const rows: ExpenseReviewRow[] = expenses.map((e) => {
     const s = STATUS[e.status];
     const extra = extras.get(e.id);
-    return {
+    const submitterName = names.get(e.created_by ?? "") || "Unknown";
+    const detail: ExpenseDetail = {
       item: e.item,
       amountLabel: formatNpr(e.amount),
       dateLabel: formatBs({ year: e.bs_year, month: e.bs_month, day: e.bs_day }),
       statusLabel: s.label,
       statusTone: s.tone,
       reimbursed: e.status === "approved" && e.reimbursed,
-      submitterName: names.get(e.created_by ?? "") || "Unknown",
+      submitterName,
       description: extra?.description ?? null,
       receiptUrl: extra?.receiptUrl ?? null,
     };
-  };
+    return {
+      id: e.id,
+      item: e.item,
+      submitterName,
+      amountLabel: formatNpr(e.amount),
+      status: e.status,
+      reimbursed: e.reimbursed,
+      detail,
+      admin: {
+        id: e.id,
+        item: e.item,
+        description: extra?.description ?? null,
+        amount: Number(e.amount),
+        spentOn: e.spent_on,
+      },
+    };
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -122,71 +135,7 @@ export default async function ReviewExpensesPage() {
           title="Submissions"
           description={`${expenses.length} ${expenses.length === 1 ? "item" : "items"} this month`}
         />
-        {expenses.length === 0 ? (
-          <EmptyState
-            icon={ClipboardCheck}
-            title="Nothing to review"
-            description="Expenses submitted by staff will appear here."
-          />
-        ) : (
-          <ul className="divide-y divide-border">
-            {expenses.map((e) => {
-              const s = STATUS[e.status];
-              return (
-                <li key={e.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-                  <ExpenseInfoTrigger expense={toDetail(e)} />
-
-                  <span className="nums w-24 text-right text-sm font-semibold text-foreground">
-                    {formatNpr(e.amount)}
-                  </span>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    {e.status === "pending" ? (
-                      <>
-                        <form action={approveExpense.bind(null, e.id)}>
-                          <Button type="submit" variant="secondary" size="sm">
-                            <Check aria-hidden className="size-4" />
-                            Approve
-                          </Button>
-                        </form>
-                        <form action={rejectExpense.bind(null, e.id)}>
-                          <Button type="submit" variant="danger" size="sm">
-                            <X aria-hidden className="size-4" />
-                            Reject
-                          </Button>
-                        </form>
-                      </>
-                    ) : (
-                      <>
-                        <Badge tone={s.tone}>{s.label}</Badge>
-                        {e.status === "approved" &&
-                          (e.reimbursed ? (
-                            <Badge tone="primary">Reimbursed</Badge>
-                          ) : (
-                            <form action={markReimbursed.bind(null, e.id)}>
-                              <Button type="submit" variant="secondary" size="sm">
-                                <BadgeCheck aria-hidden className="size-4" />
-                                Mark reimbursed
-                              </Button>
-                            </form>
-                          ))}
-                      </>
-                    )}
-                    <ExpenseAdminActions
-                      expense={{
-                        id: e.id,
-                        item: e.item,
-                        description: extras.get(e.id)?.description ?? null,
-                        amount: Number(e.amount),
-                        spentOn: e.spent_on,
-                      }}
-                    />
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        <ExpenseReviewList rows={rows} />
       </Card>
     </div>
   );

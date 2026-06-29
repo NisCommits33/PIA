@@ -1,16 +1,10 @@
-import { CalendarOff, Ban, RotateCcw } from "lucide-react";
-
 import { requireSuperAdmin } from "@/lib/roles";
 import { createClient } from "@/utils/supabase/server";
 import { formatBs } from "@/lib/bs-date";
 import { LEAVE_TYPES, type LeaveType, type LeaveStatus } from "@/lib/types";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/empty-state";
-import { cn } from "@/lib/cn";
-import { adminCancelLeave, adminReactivateLeave, adminDeleteLeave } from "./actions";
+import { LeaveList, type LeaveListRow } from "./leave-list";
 
 type LeaveRow = {
   id: string;
@@ -56,7 +50,16 @@ export default async function StaffLeavePage() {
       p.full_name,
     ]),
   );
-  const records = (leaveData as LeaveRow[] | null) ?? [];
+
+  const rows: LeaveListRow[] = ((leaveData as LeaveRow[] | null) ?? []).map((r) => ({
+    id: r.id,
+    staffName: names.get(r.staff_id) || "Unnamed",
+    leaveType: r.leave_type,
+    typeLabel: typeLabel(r.leave_type),
+    cancelled: r.status === "cancelled",
+    dateRange: dateRange(r),
+    reason: r.reason,
+  }));
 
   return (
     <div className="flex flex-col gap-6">
@@ -68,61 +71,9 @@ export default async function StaffLeavePage() {
       <Card>
         <CardHeader
           title="All leave"
-          description={`${records.length} ${records.length === 1 ? "record" : "records"}`}
+          description={`${rows.length} ${rows.length === 1 ? "record" : "records"}`}
         />
-        {records.length === 0 ? (
-          <EmptyState icon={CalendarOff} title="No leave records" description="Staff leave will appear here." />
-        ) : (
-          <ul className="divide-y divide-border">
-            {records.map((r) => {
-              const cancelled = r.status === "cancelled";
-              return (
-                <li
-                  key={r.id}
-                  className={cn(
-                    "flex flex-wrap items-center justify-between gap-3 px-4 py-3",
-                    cancelled && "opacity-60",
-                  )}
-                >
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-medium text-foreground">
-                        {names.get(r.staff_id) || "Unnamed"}
-                      </span>
-                      <Badge tone={cancelled ? "neutral" : "primary"}>{typeLabel(r.leave_type)}</Badge>
-                      {cancelled && <Badge tone="danger">Cancelled</Badge>}
-                    </div>
-                    <p className="nums mt-0.5 text-sm text-foreground">{dateRange(r)}</p>
-                    {r.reason && <p className="text-xs text-muted">{r.reason}</p>}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {cancelled ? (
-                      <form action={adminReactivateLeave.bind(null, r.id)}>
-                        <Button type="submit" variant="secondary" size="sm">
-                          <RotateCcw aria-hidden className="size-4" />
-                          Reactivate
-                        </Button>
-                      </form>
-                    ) : (
-                      <form action={adminCancelLeave.bind(null, r.id)}>
-                        <Button type="submit" variant="secondary" size="sm">
-                          <Ban aria-hidden className="size-4" />
-                          Cancel
-                        </Button>
-                      </form>
-                    )}
-                    <form action={adminDeleteLeave.bind(null, r.id)}>
-                      <Button type="submit" variant="danger" size="sm">
-                        Remove
-                      </Button>
-                    </form>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        <LeaveList rows={rows} />
       </Card>
     </div>
   );

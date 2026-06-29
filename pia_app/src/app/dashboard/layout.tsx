@@ -1,6 +1,6 @@
 import { Flame } from "lucide-react";
 
-import { requireOnboardedUser, isMessAdmin, isSuperAdmin } from "@/lib/roles";
+import { requireOnboardedUser, isMessAdmin } from "@/lib/roles";
 import { signOut } from "@/lib/session-actions";
 import { SubNav, type NavItem } from "@/components/sub-nav";
 import { BottomNav } from "@/components/bottom-nav";
@@ -29,7 +29,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (admin) {
     nav.push({ href: "/dashboard/mess", label: "Manage mess", icon: "mess" });
   }
-  if (isSuperAdmin(ctx)) {
+  if (admin) {
     nav.push({ href: "/dashboard/staff", label: "Staff", icon: "staff" });
   }
   nav.push({ href: "/dashboard/profile", label: "Profile", icon: "settings" });
