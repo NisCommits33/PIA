@@ -1,11 +1,11 @@
 "use client";
 
-import { useActionState } from "react";
-import { CheckCircle2 } from "lucide-react";
+import { useActionState, useEffect } from "react";
 
 import { DEPARTMENTS, SHIFTS, type Department, type ShiftType } from "@/lib/types";
 import { Field, Input, Select } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import { saveProfile, type ProfileState } from "./actions";
 
 export function ProfileForm({
@@ -22,6 +22,11 @@ export function ProfileForm({
   defaultShift: ShiftType | "";
 }) {
   const [state, action, pending] = useActionState<ProfileState, FormData>(saveProfile, undefined);
+  const toast = useToast();
+
+  useEffect(() => {
+    if (state?.ok) toast.success(state.ok);
+  }, [state, toast]);
 
   return (
     <form action={action} className="flex flex-col gap-4">
@@ -93,12 +98,6 @@ export function ProfileForm({
 
       <div aria-live="polite" className="min-h-5 text-sm">
         {state?.error && <span className="font-medium text-danger">{state.error}</span>}
-        {state?.ok && (
-          <span className="inline-flex items-center gap-1.5 font-medium text-success">
-            <CheckCircle2 aria-hidden className="size-4" />
-            {state.ok}
-          </span>
-        )}
       </div>
 
       <Button type="submit" loading={pending} className="sm:w-auto sm:self-start">

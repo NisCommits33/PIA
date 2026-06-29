@@ -49,9 +49,7 @@ export function FilterToolbar({
         {children}
       </div>
       <p className="text-xs text-muted">
-        {count === total
-          ? `${total} ${plural(total)}`
-          : `${count} of ${total} ${plural(total)}`}
+        {count === total ? `${total} ${plural(total)}` : `${count} of ${total} ${plural(total)}`}
       </p>
     </div>
   );

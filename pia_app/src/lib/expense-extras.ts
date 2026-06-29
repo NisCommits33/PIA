@@ -40,7 +40,9 @@ export async function getExpenseExtras(ids: string[]): Promise<Map<string, Expen
   const paths = rows.map((r) => r.receipt_path).filter((p): p is string => !!p);
   const urlByPath = new Map<string, string>();
   if (paths.length) {
-    const signed = await adminDb.storage.from(RECEIPT_BUCKET).createSignedUrls(paths, SIGNED_URL_TTL);
+    const signed = await adminDb.storage
+      .from(RECEIPT_BUCKET)
+      .createSignedUrls(paths, SIGNED_URL_TTL);
     for (const item of signed.data ?? []) {
       if (item.signedUrl && item.path) urlByPath.set(item.path, item.signedUrl);
     }

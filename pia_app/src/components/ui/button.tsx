@@ -10,8 +10,7 @@ const VARIANTS: Record<Variant, string> = {
   primary: "bg-primary text-on-primary hover:bg-primary-hover",
   secondary: "border border-border bg-surface text-foreground hover:bg-surface-muted",
   ghost: "text-muted hover:bg-surface-muted hover:text-foreground",
-  danger:
-    "border border-transparent bg-danger-soft text-danger hover:bg-danger hover:text-white",
+  danger: "border border-transparent bg-danger-soft text-danger hover:bg-danger hover:text-white",
 };
 
 const SIZES: Record<Size, string> = {
@@ -37,8 +36,9 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center rounded-lg font-semibold transition-colors",
-        "focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60",
+        "inline-flex touch-manipulation items-center justify-center rounded-lg font-semibold transition-colors",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "disabled:cursor-not-allowed disabled:opacity-60",
         "cursor-pointer",
         VARIANTS[variant],
         SIZES[size],

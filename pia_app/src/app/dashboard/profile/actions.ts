@@ -12,10 +12,7 @@ const DEPT_VALUES = DEPARTMENTS.map((d) => d.value);
 const SHIFT_VALUES = SHIFTS.map((s) => s.value);
 
 /** Update the signed-in user's own profile. Does not touch role or onboarded. */
-export async function saveProfile(
-  _prev: ProfileState,
-  formData: FormData,
-): Promise<ProfileState> {
+export async function saveProfile(_prev: ProfileState, formData: FormData): Promise<ProfileState> {
   const ctx = await requireOnboardedUser();
   const admin = isMessAdmin(ctx);
 

@@ -58,9 +58,7 @@ export default async function StaffPage() {
       <PageHeader
         title="Staff management"
         description={
-          canManageRoles
-            ? "Create accounts and assign roles."
-            : "Create and manage staff accounts."
+          canManageRoles ? "Create accounts and assign roles." : "Create and manage staff accounts."
         }
       />
 

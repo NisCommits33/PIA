@@ -11,12 +11,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-import {
-  requireOnboardedUser,
-  isMessAdmin,
-  isSuperAdmin,
-  type SessionContext,
-} from "@/lib/roles";
+import { requireOnboardedUser, isMessAdmin, isSuperAdmin, type SessionContext } from "@/lib/roles";
 import { createClient } from "@/utils/supabase/server";
 import { currentBsMonth, formatBsMonth, formatBs, type BsMonth } from "@/lib/bs-date";
 import { formatNpr } from "@/lib/format";
@@ -138,7 +133,12 @@ async function AdminDashboard({ ctx, bsMonth }: { ctx: SessionContext; bsMonth: 
       hint: "Bulk-log shift meals",
       icon: UtensilsCrossed,
     },
-    { href: "/dashboard/mess", label: "Manage mess", hint: "Bills, advances, settlement", icon: Wallet },
+    {
+      href: "/dashboard/mess",
+      label: "Manage mess",
+      hint: "Bills, advances, settlement",
+      icon: Wallet,
+    },
     ...(isSuperAdmin(ctx)
       ? [{ href: "/dashboard/staff", label: "Manage staff", hint: "Accounts & roles", icon: Users }]
       : []),
@@ -225,17 +225,19 @@ async function AdminDashboard({ ctx, bsMonth }: { ctx: SessionContext; bsMonth: 
 async function StaffDashboard({ ctx, bsMonth }: { ctx: SessionContext; bsMonth: BsMonth }) {
   const firstName = (ctx.profile?.full_name ?? "").split(" ")[0] || "there";
   const supabase = await createClient();
-  const [{ data: summaryRows }, { data: settleRows }, { data: recentExpenses }] = await Promise.all([
-    supabase.rpc("month_summary", { p_bs_year: bsMonth.year, p_bs_month: bsMonth.month }),
-    supabase.rpc("staff_settlement", { p_bs_year: bsMonth.year, p_bs_month: bsMonth.month }),
-    supabase
-      .from("expenses")
-      .select("id, item, amount, status, bs_year, bs_month, bs_day")
-      .eq("created_by", ctx.userId)
-      .eq("is_deleted", false)
-      .order("spent_on", { ascending: false })
-      .limit(5),
-  ]);
+  const [{ data: summaryRows }, { data: settleRows }, { data: recentExpenses }] = await Promise.all(
+    [
+      supabase.rpc("month_summary", { p_bs_year: bsMonth.year, p_bs_month: bsMonth.month }),
+      supabase.rpc("staff_settlement", { p_bs_year: bsMonth.year, p_bs_month: bsMonth.month }),
+      supabase
+        .from("expenses")
+        .select("id, item, amount, status, bs_year, bs_month, bs_day")
+        .eq("created_by", ctx.userId)
+        .eq("is_deleted", false)
+        .order("spent_on", { ascending: false })
+        .limit(5),
+    ],
+  );
 
   const summary = (summaryRows as MonthSummary[] | null)?.[0];
   const mine = (settleRows as Settlement[] | null)?.find((r) => r.staff_id === ctx.userId);
@@ -251,8 +253,18 @@ async function StaffDashboard({ ctx, bsMonth }: { ctx: SessionContext; bsMonth: 
         : "Due at month close";
 
   const actions: QuickAction[] = [
-    { href: "/dashboard/meals", label: "Log a meal", hint: "Record a shift meal", icon: UtensilsCrossed },
-    { href: "/dashboard/expenses", label: "Add expense", hint: "Submit a mess purchase", icon: Receipt },
+    {
+      href: "/dashboard/meals",
+      label: "Log a meal",
+      hint: "Record a shift meal",
+      icon: UtensilsCrossed,
+    },
+    {
+      href: "/dashboard/expenses",
+      label: "Add expense",
+      hint: "Submit a mess purchase",
+      icon: Receipt,
+    },
     { href: "/dashboard/leave", label: "Record leave", hint: "Note time off", icon: CalendarDays },
   ];
 

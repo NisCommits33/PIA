@@ -41,7 +41,9 @@ export default async function ReviewExpensesPage() {
   const [{ data: expenseData }, { data: profileData }] = await Promise.all([
     supabase
       .from("expenses")
-      .select("id, item, amount, spent_on, bs_year, bs_month, bs_day, status, reimbursed, created_by")
+      .select(
+        "id, item, amount, spent_on, bs_year, bs_month, bs_day, status, reimbursed, created_by",
+      )
       .eq("is_deleted", false)
       .eq("bs_year", bsMonth.year)
       .eq("bs_month", bsMonth.month)

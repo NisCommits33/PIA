@@ -114,7 +114,9 @@ export default async function LeavePage() {
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <Badge tone={cancelled ? "neutral" : "primary"}>{typeLabel(r.leave_type)}</Badge>
+                      <Badge tone={cancelled ? "neutral" : "primary"}>
+                        {typeLabel(r.leave_type)}
+                      </Badge>
                       {cancelled && <Badge tone="danger">Cancelled</Badge>}
                     </div>
                     <p className="nums mt-1 text-sm font-medium text-foreground">{dateRange(r)}</p>

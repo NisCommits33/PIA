@@ -61,7 +61,10 @@ export async function OnLeaveToday() {
       ) : (
         <ul className="divide-y divide-border">
           {rows.map((r, i) => (
-            <li key={`${r.staff_id}-${i}`} className="flex items-center justify-between gap-3 px-4 py-3">
+            <li
+              key={`${r.staff_id}-${i}`}
+              className="flex items-center justify-between gap-3 px-4 py-3"
+            >
               <span className="truncate text-sm font-medium text-foreground">
                 {names.get(r.staff_id) || "Unnamed"}
               </span>

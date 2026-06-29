@@ -37,9 +37,7 @@ export default async function ContributionsPage() {
   ]);
 
   const adminSet = new Set((adminRows ?? []).map((r) => r.user_id as string));
-  const byStaff = new Map(
-    ((contribs as ContribRow[] | null) ?? []).map((c) => [c.staff_id, c]),
-  );
+  const byStaff = new Map(((contribs as ContribRow[] | null) ?? []).map((c) => [c.staff_id, c]));
   const rows: ContributionRow[] = ((profiles as ProfileRow[] | null) ?? [])
     .filter((p) => !adminSet.has(p.id))
     .map((p) => {

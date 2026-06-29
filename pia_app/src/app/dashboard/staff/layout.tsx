@@ -5,9 +5,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
   // Accounts are managed by mess_admin+; role grants and staff-leave are super_admin-only.
   const ctx = await requireMessAdmin();
 
-  const staffNav: NavItem[] = [
-    { href: "/dashboard/staff", label: "Accounts", icon: "staff" },
-  ];
+  const staffNav: NavItem[] = [{ href: "/dashboard/staff", label: "Accounts", icon: "staff" }];
   if (isSuperAdmin(ctx)) {
     staffNav.push({ href: "/dashboard/staff/leave", label: "Staff leave", icon: "leave" });
   }

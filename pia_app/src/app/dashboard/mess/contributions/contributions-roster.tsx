@@ -5,8 +5,9 @@ import { Users } from "lucide-react";
 
 import { DEPARTMENTS, type Department } from "@/lib/types";
 import { Input, Select } from "@/components/ui/field";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useToast } from "@/components/ui/toast";
 import { FilterToolbar } from "@/components/filter-toolbar";
 import { recordContribution } from "./actions";
 
@@ -29,8 +30,18 @@ export function ContributionsRoster({
   bsYear: number;
   bsMonth: number;
 }) {
+  const toast = useToast();
   const [search, setSearch] = useState("");
   const [dept, setDept] = useState<"all" | Department>("all");
+
+  async function save(staffId: string, formData: FormData) {
+    try {
+      await recordContribution(staffId, formData);
+      toast.success("Advance saved");
+    } catch {
+      toast.error("Couldn't save the advance.");
+    }
+  }
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -43,7 +54,11 @@ export function ContributionsRoster({
 
   if (rows.length === 0) {
     return (
-      <EmptyState icon={Users} title="No staff yet" description="Create staff accounts to record advances." />
+      <EmptyState
+        icon={Users}
+        title="No staff yet"
+        description="Create staff accounts to record advances."
+      />
     );
   }
 
@@ -73,12 +88,16 @@ export function ContributionsRoster({
       </FilterToolbar>
 
       {filtered.length === 0 ? (
-        <EmptyState icon={Users} title="No matching staff" description="Try a different search or filter." />
+        <EmptyState
+          icon={Users}
+          title="No matching staff"
+          description="Try a different search or filter."
+        />
       ) : (
         <ul className="divide-y divide-border">
           {filtered.map((p) => (
             <li key={p.id} className="px-4 py-3">
-              <form action={recordContribution.bind(null, p.id)} className="flex flex-wrap items-end gap-3">
+              <form action={(fd) => save(p.id, fd)} className="flex flex-wrap items-end gap-3">
                 <input type="hidden" name="bs_year" value={bsYear} />
                 <input type="hidden" name="bs_month" value={bsMonth} />
 
@@ -106,9 +125,7 @@ export function ContributionsRoster({
                   <Input name="paid_on" type="date" defaultValue={p.paidOn} className="h-9 w-40" />
                 </label>
 
-                <Button type="submit" variant="secondary" size="sm">
-                  {p.saved ? "Update" : "Save"}
-                </Button>
+                <SubmitButton pendingLabel="Saving…">{p.saved ? "Update" : "Save"}</SubmitButton>
               </form>
             </li>
           ))}

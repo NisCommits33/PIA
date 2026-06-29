@@ -37,10 +37,7 @@ export function StatCard({
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-muted">{title}</p>
         {Icon && (
-          <Icon
-            aria-hidden
-            className={cn("size-4", emphasis ? "text-primary" : "text-muted")}
-          />
+          <Icon aria-hidden className={cn("size-4", emphasis ? "text-primary" : "text-muted")} />
         )}
       </div>
       <p className={cn("nums mt-2 text-2xl font-bold", VALUE_TONES[tone])}>{value}</p>

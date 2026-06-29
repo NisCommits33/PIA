@@ -53,11 +53,7 @@ export async function createLeave(_prev: LeaveState, formData: FormData): Promis
 async function setStatus(id: string, status: "active" | "cancelled") {
   const ctx = await requireOnboardedUser();
   const supabase = await createClient();
-  await supabase
-    .from("leave_records")
-    .update({ status })
-    .eq("id", id)
-    .eq("staff_id", ctx.userId);
+  await supabase.from("leave_records").update({ status }).eq("id", id).eq("staff_id", ctx.userId);
   revalidatePath("/dashboard/leave");
 }
 

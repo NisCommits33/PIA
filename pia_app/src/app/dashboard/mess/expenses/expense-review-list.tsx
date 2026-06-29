@@ -5,9 +5,9 @@ import { ClipboardCheck, Check, X, BadgeCheck } from "lucide-react";
 
 import type { ExpenseStatus } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/field";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ActionButton } from "@/components/ui/action-button";
 import { FilterToolbar } from "@/components/filter-toolbar";
 import { ExpenseInfoTrigger, type ExpenseDetail } from "@/components/expense-detail";
 import { ExpenseAdminActions } from "./expense-admin-actions";
@@ -37,11 +37,7 @@ export function ExpenseReviewList({ rows }: { rows: ExpenseReviewRow[] }) {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return rows.filter((e) => {
-      if (
-        q &&
-        !e.item.toLowerCase().includes(q) &&
-        !e.submitterName.toLowerCase().includes(q)
-      ) {
+      if (q && !e.item.toLowerCase().includes(q) && !e.submitterName.toLowerCase().includes(q)) {
         return false;
       }
       if (status !== "all" && e.status !== status) return false;
@@ -93,7 +89,10 @@ export function ExpenseReviewList({ rows }: { rows: ExpenseReviewRow[] }) {
           {filtered.map((e) => {
             const s = STATUS[e.status];
             return (
-              <li key={e.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+              <li
+                key={e.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+              >
                 <ExpenseInfoTrigger expense={e.detail} />
 
                 <span className="nums w-24 text-right text-sm font-semibold text-foreground">
@@ -103,18 +102,26 @@ export function ExpenseReviewList({ rows }: { rows: ExpenseReviewRow[] }) {
                 <div className="flex flex-wrap items-center gap-2">
                   {e.status === "pending" ? (
                     <>
-                      <form action={approveExpense.bind(null, e.id)}>
-                        <Button type="submit" variant="secondary" size="sm">
-                          <Check aria-hidden className="size-4" />
-                          Approve
-                        </Button>
-                      </form>
-                      <form action={rejectExpense.bind(null, e.id)}>
-                        <Button type="submit" variant="danger" size="sm">
-                          <X aria-hidden className="size-4" />
-                          Reject
-                        </Button>
-                      </form>
+                      <ActionButton
+                        action={() => approveExpense(e.id)}
+                        successMessage={`Approved “${e.item}”`}
+                      >
+                        <Check aria-hidden className="size-4" />
+                        Approve
+                      </ActionButton>
+                      <ActionButton
+                        action={() => rejectExpense(e.id)}
+                        variant="danger"
+                        successMessage={`Rejected “${e.item}”`}
+                        confirm={{
+                          title: "Reject expense?",
+                          body: `“${e.item}” won't count toward the cost per meal.`,
+                          confirmLabel: "Reject",
+                        }}
+                      >
+                        <X aria-hidden className="size-4" />
+                        Reject
+                      </ActionButton>
                     </>
                   ) : (
                     <>
@@ -123,12 +130,13 @@ export function ExpenseReviewList({ rows }: { rows: ExpenseReviewRow[] }) {
                         (e.reimbursed ? (
                           <Badge tone="primary">Reimbursed</Badge>
                         ) : (
-                          <form action={markReimbursed.bind(null, e.id)}>
-                            <Button type="submit" variant="secondary" size="sm">
-                              <BadgeCheck aria-hidden className="size-4" />
-                              Mark reimbursed
-                            </Button>
-                          </form>
+                          <ActionButton
+                            action={() => markReimbursed(e.id)}
+                            successMessage="Marked reimbursed"
+                          >
+                            <BadgeCheck aria-hidden className="size-4" />
+                            Mark reimbursed
+                          </ActionButton>
                         ))}
                     </>
                   )}

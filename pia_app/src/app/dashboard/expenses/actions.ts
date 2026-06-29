@@ -83,7 +83,12 @@ export async function submitExpense(
   // Best-effort: attach the note and bill photo. Each failure (missing column or
   // bucket) is collected so we can tell the user it's pending setup, without
   // losing the expense that was already saved.
-  const pendingSetup = await attachExtras(inserted.id, ctx.userId, description, hasReceipt ? (receipt as File) : null);
+  const pendingSetup = await attachExtras(
+    inserted.id,
+    ctx.userId,
+    description,
+    hasReceipt ? (receipt as File) : null,
+  );
 
   revalidatePath("/dashboard/expenses");
   if (admin) {

@@ -1,11 +1,11 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
-import { CheckCircle2 } from "lucide-react";
 
 import { SHIFTS, type ShiftType } from "@/lib/types";
 import { Field, Input, Select } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import { logMeal, type MealState } from "./actions";
 
 export function MealForm({
@@ -17,11 +17,15 @@ export function MealForm({
 }) {
   const [state, action, pending] = useActionState<MealState, FormData>(logMeal, undefined);
   const formRef = useRef<HTMLFormElement>(null);
+  const toast = useToast();
 
   // Reset the form after a successful log so it's ready for the next entry.
   useEffect(() => {
-    if (state?.ok) formRef.current?.reset();
-  }, [state?.ok]);
+    if (state?.ok) {
+      toast.success(state.ok);
+      formRef.current?.reset();
+    }
+  }, [state, toast]);
 
   return (
     <form ref={formRef} action={action} className="flex flex-col gap-4">
@@ -50,12 +54,6 @@ export function MealForm({
 
       <div aria-live="polite" className="min-h-5 text-sm">
         {state?.error && <span className="font-medium text-danger">{state.error}</span>}
-        {state?.ok && (
-          <span className="inline-flex items-center gap-1.5 font-medium text-success">
-            <CheckCircle2 aria-hidden className="size-4" />
-            {state.ok}
-          </span>
-        )}
       </div>
     </form>
   );

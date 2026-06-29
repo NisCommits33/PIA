@@ -34,12 +34,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
                   active ? "text-primary" : "text-muted hover:text-foreground",
                 )}
               >
-                {Icon && (
-                  <Icon
-                    aria-hidden
-                    className={cn("size-5", active && "stroke-[2.25]")}
-                  />
-                )}
+                {Icon && <Icon aria-hidden className={cn("size-5", active && "stroke-[2.25]")} />}
                 <span className="max-w-full truncate">{item.label}</span>
               </Link>
             </li>

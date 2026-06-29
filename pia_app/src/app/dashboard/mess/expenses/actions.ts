@@ -39,7 +39,11 @@ export async function markReimbursed(id: string): Promise<void> {
   const supabase = await createClient();
   await supabase
     .from("expenses")
-    .update({ reimbursed: true, reimbursed_by: ctx.userId, reimbursed_at: new Date().toISOString() })
+    .update({
+      reimbursed: true,
+      reimbursed_by: ctx.userId,
+      reimbursed_at: new Date().toISOString(),
+    })
     .eq("id", id)
     .eq("status", "approved");
   revalidateMess();

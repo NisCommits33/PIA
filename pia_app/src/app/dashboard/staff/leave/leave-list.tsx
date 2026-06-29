@@ -5,9 +5,9 @@ import { CalendarOff, Ban, RotateCcw } from "lucide-react";
 
 import { LEAVE_TYPES, type LeaveType } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/field";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ActionButton } from "@/components/ui/action-button";
 import { cn } from "@/lib/cn";
 import { FilterToolbar } from "@/components/filter-toolbar";
 import { adminCancelLeave, adminReactivateLeave, adminDeleteLeave } from "./actions";
@@ -53,7 +53,11 @@ export function LeaveList({ rows }: { rows: LeaveListRow[] }) {
 
   if (rows.length === 0) {
     return (
-      <EmptyState icon={CalendarOff} title="No leave records" description="Staff leave will appear here." />
+      <EmptyState
+        icon={CalendarOff}
+        title="No leave records"
+        description="Staff leave will appear here."
+      />
     );
   }
 
@@ -133,25 +137,34 @@ export function LeaveList({ rows }: { rows: LeaveListRow[] }) {
 
               <div className="flex items-center gap-2">
                 {r.cancelled ? (
-                  <form action={adminReactivateLeave.bind(null, r.id)}>
-                    <Button type="submit" variant="secondary" size="sm">
-                      <RotateCcw aria-hidden className="size-4" />
-                      Reactivate
-                    </Button>
-                  </form>
+                  <ActionButton
+                    action={() => adminReactivateLeave(r.id)}
+                    successMessage="Leave reactivated"
+                  >
+                    <RotateCcw aria-hidden className="size-4" />
+                    Reactivate
+                  </ActionButton>
                 ) : (
-                  <form action={adminCancelLeave.bind(null, r.id)}>
-                    <Button type="submit" variant="secondary" size="sm">
-                      <Ban aria-hidden className="size-4" />
-                      Cancel
-                    </Button>
-                  </form>
+                  <ActionButton
+                    action={() => adminCancelLeave(r.id)}
+                    successMessage="Leave cancelled"
+                  >
+                    <Ban aria-hidden className="size-4" />
+                    Cancel
+                  </ActionButton>
                 )}
-                <form action={adminDeleteLeave.bind(null, r.id)}>
-                  <Button type="submit" variant="danger" size="sm">
-                    Remove
-                  </Button>
-                </form>
+                <ActionButton
+                  action={() => adminDeleteLeave(r.id)}
+                  variant="danger"
+                  successMessage="Leave record removed"
+                  confirm={{
+                    title: "Remove leave record?",
+                    body: `${r.staffName}'s ${r.typeLabel.toLowerCase()} leave (${r.dateRange}) will be permanently deleted.`,
+                    confirmLabel: "Remove",
+                  }}
+                >
+                  Remove
+                </ActionButton>
               </div>
             </li>
           ))}

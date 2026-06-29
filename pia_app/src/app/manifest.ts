@@ -4,8 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Station Ops — Pokhara Fire Station",
     short_name: "Station Ops",
-    description:
-      "Mess finance and leave tracking for Pokhara Fire Station staff.",
+    description: "Mess finance and leave tracking for Pokhara Fire Station staff.",
     start_url: "/",
     scope: "/",
     display: "standalone",

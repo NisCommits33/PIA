@@ -73,10 +73,7 @@ export default async function BulkMealsPage({
 
       <Card>
         <CardHeader title="Roster filter" />
-        <form
-          method="get"
-          className="grid gap-4 p-4 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end"
-        >
+        <form method="get" className="grid gap-4 p-4 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">
           <Field label="Date" htmlFor="date">
             <Input id="date" name="date" type="date" defaultValue={date} />
           </Field>

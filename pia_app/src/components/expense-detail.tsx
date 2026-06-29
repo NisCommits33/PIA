@@ -24,7 +24,9 @@ export type ExpenseDetail = {
 function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-4 border-b border-border py-2 last:border-0">
-      <span className="shrink-0 text-xs font-medium uppercase tracking-wide text-muted">{label}</span>
+      <span className="shrink-0 text-xs font-medium uppercase tracking-wide text-muted">
+        {label}
+      </span>
       <span className="min-w-0 text-right text-sm text-foreground">{children}</span>
     </div>
   );

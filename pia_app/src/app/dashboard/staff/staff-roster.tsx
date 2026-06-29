@@ -5,9 +5,9 @@ import { Users, ShieldPlus, ShieldMinus, Power, PowerOff } from "lucide-react";
 
 import type { AppRole } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/field";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ActionButton } from "@/components/ui/action-button";
 import { FilterToolbar } from "@/components/filter-toolbar";
 import { setRole, setActive } from "./actions";
 
@@ -53,7 +53,11 @@ export function StaffRoster({
 
   if (rows.length === 0) {
     return (
-      <EmptyState icon={Users} title="No accounts yet" description="Create the first staff account above." />
+      <EmptyState
+        icon={Users}
+        title="No accounts yet"
+        description="Create the first staff account above."
+      />
     );
   }
 
@@ -91,7 +95,11 @@ export function StaffRoster({
       </FilterToolbar>
 
       {filtered.length === 0 ? (
-        <EmptyState icon={Users} title="No matching accounts" description="Try a different search or filter." />
+        <EmptyState
+          icon={Users}
+          title="No matching accounts"
+          description="Try a different search or filter."
+        />
       ) : (
         <ul className="divide-y divide-border">
           {filtered.map((p) => (
@@ -121,67 +129,79 @@ export function StaffRoster({
               <div className="flex flex-wrap items-center gap-2">
                 {canManageRoles && (
                   <>
-                    <form action={setRole.bind(null, p.id, "mess_admin", !p.isMessAdmin)}>
-                      <Button type="submit" variant="secondary" size="sm" disabled={p.isSuperAdmin}>
-                        {p.isMessAdmin ? (
-                          <>
-                            <ShieldMinus aria-hidden className="size-4" /> Mess admin
-                          </>
-                        ) : (
-                          <>
-                            <ShieldPlus aria-hidden className="size-4" /> Mess admin
-                          </>
-                        )}
-                      </Button>
-                    </form>
+                    <ActionButton
+                      action={() => setRole(p.id, "mess_admin", !p.isMessAdmin)}
+                      disabled={p.isSuperAdmin}
+                      successMessage={p.isMessAdmin ? "Mess admin removed" : "Mess admin granted"}
+                    >
+                      {p.isMessAdmin ? (
+                        <>
+                          <ShieldMinus aria-hidden className="size-4" /> Mess admin
+                        </>
+                      ) : (
+                        <>
+                          <ShieldPlus aria-hidden className="size-4" /> Mess admin
+                        </>
+                      )}
+                    </ActionButton>
 
-                    <form action={setRole.bind(null, p.id, "super_admin", !p.isSuperAdmin)}>
-                      <Button
-                        type="submit"
-                        variant="secondary"
-                        size="sm"
-                        disabled={p.isSelf && p.isSuperAdmin}
-                        title={p.isSelf && p.isSuperAdmin ? "You can't remove your own super admin" : undefined}
-                      >
-                        {p.isSuperAdmin ? (
-                          <>
-                            <ShieldMinus aria-hidden className="size-4" /> Super admin
-                          </>
-                        ) : (
-                          <>
-                            <ShieldPlus aria-hidden className="size-4" /> Super admin
-                          </>
-                        )}
-                      </Button>
-                    </form>
+                    <ActionButton
+                      action={() => setRole(p.id, "super_admin", !p.isSuperAdmin)}
+                      disabled={p.isSelf && p.isSuperAdmin}
+                      title={
+                        p.isSelf && p.isSuperAdmin
+                          ? "You can't remove your own super admin"
+                          : undefined
+                      }
+                      successMessage={
+                        p.isSuperAdmin ? "Super admin removed" : "Super admin granted"
+                      }
+                    >
+                      {p.isSuperAdmin ? (
+                        <>
+                          <ShieldMinus aria-hidden className="size-4" /> Super admin
+                        </>
+                      ) : (
+                        <>
+                          <ShieldPlus aria-hidden className="size-4" /> Super admin
+                        </>
+                      )}
+                    </ActionButton>
                   </>
                 )}
 
-                <form action={setActive.bind(null, p.id, !p.isActive)}>
-                  <Button
-                    type="submit"
-                    variant={p.isActive ? "danger" : "secondary"}
-                    size="sm"
-                    disabled={p.isSelf || (p.isSuperAdmin && !canManageRoles)}
-                    title={
-                      p.isSelf
-                        ? "You can't deactivate yourself"
-                        : p.isSuperAdmin && !canManageRoles
-                          ? "Only a super admin can manage super admin accounts"
-                          : undefined
-                    }
-                  >
-                    {p.isActive ? (
-                      <>
-                        <PowerOff aria-hidden className="size-4" /> Deactivate
-                      </>
-                    ) : (
-                      <>
-                        <Power aria-hidden className="size-4" /> Activate
-                      </>
-                    )}
-                  </Button>
-                </form>
+                <ActionButton
+                  action={() => setActive(p.id, !p.isActive)}
+                  variant={p.isActive ? "danger" : "secondary"}
+                  disabled={p.isSelf || (p.isSuperAdmin && !canManageRoles)}
+                  title={
+                    p.isSelf
+                      ? "You can't deactivate yourself"
+                      : p.isSuperAdmin && !canManageRoles
+                        ? "Only a super admin can manage super admin accounts"
+                        : undefined
+                  }
+                  successMessage={p.isActive ? "Account deactivated" : "Account activated"}
+                  confirm={
+                    p.isActive
+                      ? {
+                          title: "Deactivate account?",
+                          body: `${p.name || p.username} won't be able to sign in until reactivated.`,
+                          confirmLabel: "Deactivate",
+                        }
+                      : undefined
+                  }
+                >
+                  {p.isActive ? (
+                    <>
+                      <PowerOff aria-hidden className="size-4" /> Deactivate
+                    </>
+                  ) : (
+                    <>
+                      <Power aria-hidden className="size-4" /> Activate
+                    </>
+                  )}
+                </ActionButton>
               </div>
             </li>
           ))}

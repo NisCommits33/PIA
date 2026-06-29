@@ -1,19 +1,23 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
-import { CheckCircle2 } from "lucide-react";
 
 import { Field, Input, Textarea } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import { submitExpense, type ExpenseState } from "./actions";
 
 export function ExpenseForm({ defaultDate }: { defaultDate: string }) {
   const [state, action, pending] = useActionState<ExpenseState, FormData>(submitExpense, undefined);
   const formRef = useRef<HTMLFormElement>(null);
+  const toast = useToast();
 
   useEffect(() => {
-    if (state?.ok) formRef.current?.reset();
-  }, [state?.ok]);
+    if (state?.ok) {
+      toast.success(state.ok);
+      formRef.current?.reset();
+    }
+  }, [state, toast]);
 
   return (
     <form ref={formRef} action={action} className="flex flex-col gap-4">
@@ -69,12 +73,6 @@ export function ExpenseForm({ defaultDate }: { defaultDate: string }) {
 
       <div aria-live="polite" className="min-h-5 text-sm">
         {state?.error && <span className="font-medium text-danger">{state.error}</span>}
-        {state?.ok && (
-          <span className="inline-flex items-center gap-1.5 font-medium text-success">
-            <CheckCircle2 aria-hidden className="size-4" />
-            {state.ok}
-          </span>
-        )}
       </div>
 
       <Button type="submit" loading={pending} className="sm:w-auto sm:self-start">
