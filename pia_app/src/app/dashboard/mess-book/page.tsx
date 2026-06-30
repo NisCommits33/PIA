@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Coins, Receipt, UtensilsCrossed, Scale, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { requireOnboardedUser } from "@/lib/roles";
-import { createClient } from "@/utils/supabase/server";
 import {
   currentBsMonth,
   formatBsMonth,
@@ -12,34 +11,13 @@ import {
   type BsMonth,
 } from "@/lib/bs-date";
 import { formatNpr } from "@/lib/format";
-import type { ExpenseStatus } from "@/lib/types";
+import { getMonthData } from "@/lib/mess-data";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { SettlementTable, type SettlementRow } from "@/components/settlement-table";
+import { SettlementTable } from "@/components/settlement-table";
 import { MessLedgerList, type LedgerEntry } from "./mess-ledger-list";
-
-type MonthSummary = {
-  total_expenses: number;
-  total_meals: number;
-  cost_per_meal: number | null;
-};
-
-type LedgerRow = {
-  id: string;
-  item: string;
-  description: string | null;
-  amount: number;
-  bs_year: number;
-  bs_month: number;
-  bs_day: number;
-  status: ExpenseStatus;
-  reimbursed: boolean;
-  submitted_by: string | null;
-  approved_by: string | null;
-  reviewed_at: string | null;
-};
 
 function monthIndex({ year, month }: BsMonth): number {
   return year * 12 + (month - 1);
@@ -67,16 +45,13 @@ export default async function MessBookPage({
   const next = stepBsMonth(bsMonth, 1);
   const atCurrent = monthIndex(bsMonth) >= monthIndex(now);
 
-  const supabase = await createClient();
-  const [{ data: summaryRows }, { data: settleRows }, { data: ledgerRows }] = await Promise.all([
-    supabase.rpc("month_summary", { p_bs_year: bsMonth.year, p_bs_month: bsMonth.month }),
-    supabase.rpc("staff_settlement", { p_bs_year: bsMonth.year, p_bs_month: bsMonth.month }),
-    supabase.rpc("mess_expense_ledger", { p_bs_year: bsMonth.year, p_bs_month: bsMonth.month }),
-  ]);
+  const {
+    summary,
+    settlement,
+    ledger: ledgerRows,
+  } = await getMonthData(bsMonth.year, bsMonth.month);
 
-  const summary = (summaryRows as MonthSummary[] | null)?.[0];
-  const settlement = (settleRows as SettlementRow[] | null) ?? [];
-  const ledger: LedgerEntry[] = ((ledgerRows as LedgerRow[] | null) ?? []).map((e) => ({
+  const ledger: LedgerEntry[] = ledgerRows.map((e) => ({
     id: e.id,
     item: e.item,
     description: e.description,

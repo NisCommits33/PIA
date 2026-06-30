@@ -30,15 +30,6 @@ type MonthSummary = {
   cost_per_meal: number | null;
 };
 
-type Settlement = {
-  staff_id: string;
-  meal_count: number;
-  cost_per_meal: number | null;
-  bill: number | null;
-  advance: number;
-  balance: number | null;
-};
-
 type MiniExpense = {
   id: string;
   item: string;
@@ -225,25 +216,46 @@ async function AdminDashboard({ ctx, bsMonth }: { ctx: SessionContext; bsMonth: 
 async function StaffDashboard({ ctx, bsMonth }: { ctx: SessionContext; bsMonth: BsMonth }) {
   const firstName = (ctx.profile?.full_name ?? "").split(" ")[0] || "there";
   const supabase = await createClient();
-  const [{ data: summaryRows }, { data: settleRows }, { data: recentExpenses }] = await Promise.all(
-    [
-      supabase.rpc("month_summary", { p_bs_year: bsMonth.year, p_bs_month: bsMonth.month }),
-      supabase.rpc("staff_settlement", { p_bs_year: bsMonth.year, p_bs_month: bsMonth.month }),
-      supabase
-        .from("expenses")
-        .select("id, item, amount, status, bs_year, bs_month, bs_day")
-        .eq("created_by", ctx.userId)
-        .eq("is_deleted", false)
-        .order("spent_on", { ascending: false })
-        .limit(5),
-    ],
-  );
+  // Personal numbers only — fetch the user's own meal count + advance directly
+  // (both hit covering indexes) instead of running the full all-staff settlement.
+  const [
+    { data: summaryRows },
+    { count: myMealCount },
+    { data: contribRow },
+    { data: recentExpenses },
+  ] = await Promise.all([
+    supabase.rpc("month_summary", { p_bs_year: bsMonth.year, p_bs_month: bsMonth.month }),
+    supabase
+      .from("meal_logs")
+      .select("id", { count: "exact", head: true })
+      .eq("staff_id", ctx.userId)
+      .eq("bs_year", bsMonth.year)
+      .eq("bs_month", bsMonth.month),
+    supabase
+      .from("contributions")
+      .select("amount")
+      .eq("staff_id", ctx.userId)
+      .eq("bs_year", bsMonth.year)
+      .eq("bs_month", bsMonth.month)
+      .maybeSingle(),
+    supabase
+      .from("expenses")
+      .select("id, item, amount, status, bs_year, bs_month, bs_day")
+      .eq("created_by", ctx.userId)
+      .eq("is_deleted", false)
+      .order("spent_on", { ascending: false })
+      .limit(5),
+  ]);
 
   const summary = (summaryRows as MonthSummary[] | null)?.[0];
-  const mine = (settleRows as Settlement[] | null)?.find((r) => r.staff_id === ctx.userId);
   const recent = (recentExpenses as MiniExpense[] | null) ?? [];
 
-  const balance = mine?.balance ?? null;
+  const mealCount = myMealCount ?? 0;
+  const advance = Number((contribRow as { amount: number } | null)?.amount ?? 0);
+  const costPerMeal = summary?.cost_per_meal ?? null;
+  const bill = costPerMeal === null ? null : Math.round(mealCount * costPerMeal * 100) / 100;
+  const balance =
+    costPerMeal === null ? null : Math.round((advance - mealCount * costPerMeal) * 100) / 100;
   const balanceTone = balance === null ? "default" : balance >= 0 ? "success" : "danger";
   const balanceHint =
     balance === null
@@ -292,20 +304,20 @@ async function StaffDashboard({ ctx, bsMonth }: { ctx: SessionContext; bsMonth: 
         />
         <StatCard
           title="My meals this month"
-          value={String(mine?.meal_count ?? 0)}
+          value={String(mealCount)}
           hint="Across both shifts"
           icon={UtensilsCrossed}
         />
         <StatCard
           title="My running bill"
-          value={formatNpr(mine?.bill)}
+          value={formatNpr(bill)}
           hint="Meals × cost per meal"
           icon={Receipt}
         />
         <StatCard
           title="Projected balance"
           value={formatNpr(balance)}
-          hint={`Advance ${formatNpr(mine?.advance ?? 0)} · ${balanceHint}`}
+          hint={`Advance ${formatNpr(advance)} · ${balanceHint}`}
           icon={Wallet}
           tone={balanceTone}
         />

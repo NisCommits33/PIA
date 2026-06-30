@@ -56,11 +56,16 @@ export async function createStaffAccount(
     };
   }
 
-  // The new-user trigger created the profile + staff role; set the name and any
-  // department/shift the admin pre-selected.
+  // The new-user trigger created the profile + staff role; set the name, the
+  // denormalised email, and any department/shift the admin pre-selected.
   await admin
     .from("profiles")
-    .update({ full_name: fullName, department, default_shift: defaultShift })
+    .update({
+      full_name: fullName,
+      email: `${username}@pia.local`,
+      department,
+      default_shift: defaultShift,
+    })
     .eq("id", data.user.id);
 
   revalidateStaff();

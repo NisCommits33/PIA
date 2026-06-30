@@ -9,6 +9,7 @@ import { StaffRoster, type StaffRow } from "./staff-roster";
 
 type ProfileRow = {
   id: string;
+  email: string | null;
   full_name: string | null;
   department: Department | null;
   is_active: boolean;
@@ -25,11 +26,11 @@ export default async function StaffPage() {
   const admin = createAdminClient();
 
   // Service-role reads so the roster + role badges render for mess_admin too,
-  // regardless of profiles/user_roles SELECT RLS.
-  const [{ data: profiles }, { data: roleRows }, usersResult] = await Promise.all([
-    admin.from("profiles").select("id, full_name, department, is_active").order("full_name"),
+  // regardless of profiles/user_roles SELECT RLS. Email is denormalised on the
+  // profile, so no auth.admin.listUsers() round-trip is needed.
+  const [{ data: profiles }, { data: roleRows }] = await Promise.all([
+    admin.from("profiles").select("id, email, full_name, department, is_active").order("full_name"),
     admin.from("user_roles").select("user_id, role"),
-    admin.auth.admin.listUsers({ perPage: 1000 }),
   ]);
 
   const rolesByUser = new Map<string, Set<AppRole>>();
@@ -37,14 +38,13 @@ export default async function StaffPage() {
     if (!rolesByUser.has(r.user_id)) rolesByUser.set(r.user_id, new Set());
     rolesByUser.get(r.user_id)!.add(r.role);
   }
-  const emailById = new Map(usersResult.data.users.map((u) => [u.id, u.email ?? ""]));
 
   const rows: StaffRow[] = ((profiles as ProfileRow[] | null) ?? []).map((p) => {
     const roles = rolesByUser.get(p.id) ?? new Set<AppRole>();
     return {
       id: p.id,
       name: p.full_name ?? "",
-      username: (emailById.get(p.id) ?? "").split("@")[0],
+      username: (p.email ?? "").split("@")[0],
       deptLabel: deptLabel(p.department),
       isActive: p.is_active,
       isMessAdmin: roles.has("mess_admin"),
