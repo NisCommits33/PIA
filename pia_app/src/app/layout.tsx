@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Fira_Sans, Fira_Code } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { StartupAnimation } from "@/components/startup-animation";
 
 const firaSans = Fira_Sans({
   variable: "--font-fira-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${firaSans.variable} ${firaCode.variable} h-full antialiased`}>
       <body className="min-h-dvh flex flex-col">
+        <StartupAnimation />
         {children}
         <ServiceWorkerRegister />
       </body>
