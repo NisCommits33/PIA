@@ -46,10 +46,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const supabase = await createClient();
   const { data: notifRows } = await supabase
     .from("notifications")
-    .select("id, title, body, link, read_at, created_at")
+    .select("id, title, body, link, kind, read_at, created_at")
     .eq("recipient_id", ctx.userId)
     .order("created_at", { ascending: false })
-    .limit(20);
+    .limit(30);
   const notifications: NotificationItem[] = (
     (notifRows as
       | {
@@ -57,6 +57,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           title: string;
           body: string | null;
           link: string | null;
+          kind: string | null;
           read_at: string | null;
           created_at: string;
         }[]
@@ -66,6 +67,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     title: n.title,
     body: n.body,
     link: n.link,
+    kind: n.kind ?? "general",
     read: n.read_at != null,
     createdAt: n.created_at,
   }));

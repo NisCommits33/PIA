@@ -8,6 +8,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
   const staffNav: NavItem[] = [{ href: "/dashboard/staff", label: "Accounts", icon: "staff" }];
   if (isSuperAdmin(ctx)) {
     staffNav.push({ href: "/dashboard/staff/leave", label: "Staff leave", icon: "leave" });
+    staffNav.push({ href: "/dashboard/staff/announce", label: "Announce", icon: "announce" });
   }
 
   return (

@@ -14,6 +14,7 @@ import {
   Settings,
   BookOpen,
   Activity,
+  Megaphone,
 } from "lucide-react";
 
 import { cn } from "@/lib/cn";
@@ -32,6 +33,7 @@ export const ICONS = {
   settings: Settings,
   messbook: BookOpen,
   activity: Activity,
+  announce: Megaphone,
 } as const;
 
 export type NavIcon = keyof typeof ICONS;
