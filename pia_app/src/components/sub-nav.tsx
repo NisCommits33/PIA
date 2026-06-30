@@ -13,6 +13,7 @@ import {
   Users,
   Settings,
   BookOpen,
+  Activity,
 } from "lucide-react";
 
 import { cn } from "@/lib/cn";
@@ -30,6 +31,7 @@ export const ICONS = {
   staff: Users,
   settings: Settings,
   messbook: BookOpen,
+  activity: Activity,
 } as const;
 
 export type NavIcon = keyof typeof ICONS;

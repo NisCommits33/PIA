@@ -11,6 +11,7 @@ import {
   EyeOff,
   Copy,
   Check,
+  Trash2,
 } from "lucide-react";
 
 import type { AppRole } from "@/lib/types";
@@ -19,7 +20,7 @@ import { Select } from "@/components/ui/field";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ActionButton } from "@/components/ui/action-button";
 import { FilterToolbar } from "@/components/filter-toolbar";
-import { setRole, setActive } from "./actions";
+import { setRole, setActive, deleteStaffAccount } from "./actions";
 
 /** The default login password for an account, derived from its username. */
 function defaultPassword(username: string): string {
@@ -278,6 +279,23 @@ export function StaffRoster({
                     </>
                   )}
                 </ActionButton>
+
+                {canManageRoles && (
+                  <ActionButton
+                    action={() => deleteStaffAccount(p.id)}
+                    variant="danger"
+                    disabled={p.isSelf}
+                    title={p.isSelf ? "You can't delete your own account" : undefined}
+                    successMessage={`Deleted ${p.name || p.username}`}
+                    confirm={{
+                      title: "Delete account?",
+                      body: `${p.name || p.username}'s account and all their data (meals, expenses, advances, leave) will be permanently deleted. This can't be undone.`,
+                      confirmLabel: "Delete",
+                    }}
+                  >
+                    <Trash2 aria-hidden className="size-4" /> Delete
+                  </ActionButton>
+                )}
               </div>
             </li>
           ))}

@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 import { requireMessAdmin } from "@/lib/roles";
 import { adStringToBs } from "@/lib/bs-date";
+import { formatNpr } from "@/lib/format";
+import { logActivity } from "@/lib/activity";
 
 export type EditExpenseState = { error?: string; ok?: string } | undefined;
 
@@ -18,11 +20,21 @@ function revalidateMess() {
 async function setStatus(id: string, status: "approved" | "rejected") {
   const ctx = await requireMessAdmin();
   const supabase = await createClient();
-  await supabase
+  const { data } = await supabase
     .from("expenses")
     .update({ status, reviewed_by: ctx.userId, reviewed_at: new Date().toISOString() })
-    .eq("id", id);
+    .eq("id", id)
+    .select("item, amount")
+    .maybeSingle();
   revalidateMess();
+  if (data) {
+    await logActivity({
+      action: `expense.${status}`,
+      summary: `${status === "approved" ? "Approved" : "Rejected"} expense “${data.item}” (${formatNpr(data.amount)})`,
+      entityType: "expense",
+      entityId: id,
+    });
+  }
 }
 
 export async function approveExpense(id: string): Promise<void> {
@@ -37,7 +49,7 @@ export async function rejectExpense(id: string): Promise<void> {
 export async function markReimbursed(id: string): Promise<void> {
   const ctx = await requireMessAdmin();
   const supabase = await createClient();
-  await supabase
+  const { data } = await supabase
     .from("expenses")
     .update({
       reimbursed: true,
@@ -45,8 +57,18 @@ export async function markReimbursed(id: string): Promise<void> {
       reimbursed_at: new Date().toISOString(),
     })
     .eq("id", id)
-    .eq("status", "approved");
+    .eq("status", "approved")
+    .select("item, amount")
+    .maybeSingle();
   revalidateMess();
+  if (data) {
+    await logActivity({
+      action: "expense.reimbursed",
+      summary: `Marked “${data.item}” (${formatNpr(data.amount)}) reimbursed`,
+      entityType: "expense",
+      entityId: id,
+    });
+  }
 }
 
 /** Edit an expense's core fields (mess admin only). */
@@ -85,6 +107,12 @@ export async function editExpense(
   if (error) return { error: "Could not save the changes. Please try again." };
 
   revalidateMess();
+  await logActivity({
+    action: "expense.edited",
+    summary: `Edited expense “${item}” (${formatNpr(amount)})`,
+    entityType: "expense",
+    entityId: id,
+  });
   return { ok: "Expense updated." };
 }
 
@@ -92,6 +120,19 @@ export async function editExpense(
 export async function removeExpense(id: string): Promise<void> {
   await requireMessAdmin();
   const supabase = await createClient();
-  await supabase.from("expenses").update({ is_deleted: true }).eq("id", id);
+  const { data } = await supabase
+    .from("expenses")
+    .update({ is_deleted: true })
+    .eq("id", id)
+    .select("item, amount")
+    .maybeSingle();
   revalidateMess();
+  if (data) {
+    await logActivity({
+      action: "expense.removed",
+      summary: `Removed expense “${data.item}” (${formatNpr(data.amount)})`,
+      entityType: "expense",
+      entityId: id,
+    });
+  }
 }

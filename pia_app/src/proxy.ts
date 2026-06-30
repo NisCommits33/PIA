@@ -8,6 +8,10 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Run on all routes except static assets and image optimization files.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  // Run on all routes except static assets, image files, and the PWA assets
+  // (manifest + service worker). The manifest link is fetched WITHOUT credentials,
+  // so it must never hit the auth redirect or the app won't be installable.
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+  ],
 };

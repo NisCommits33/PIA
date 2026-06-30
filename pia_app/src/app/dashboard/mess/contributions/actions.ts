@@ -4,6 +4,9 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/utils/supabase/server";
 import { requireMessAdmin } from "@/lib/roles";
+import { formatNpr } from "@/lib/format";
+import { formatBsMonth } from "@/lib/bs-date";
+import { logActivity } from "@/lib/activity";
 
 /** Record (or update) a staff member's monthly advance. */
 export async function recordContribution(staffId: string, formData: FormData): Promise<void> {
@@ -33,4 +36,16 @@ export async function recordContribution(staffId: string, formData: FormData): P
   revalidatePath("/dashboard/mess/contributions");
   revalidatePath("/dashboard/mess/settlement");
   revalidatePath("/dashboard");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", staffId)
+    .maybeSingle();
+  const name = profile?.full_name || "a staff member";
+  await logActivity({
+    action: "contribution.recorded",
+    summary: `Set ${name}'s advance to ${formatNpr(amount)} — ${formatBsMonth({ year: bsYear, month: bsMonth })}`,
+    entityType: "contribution",
+  });
 }

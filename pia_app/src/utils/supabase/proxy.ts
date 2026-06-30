@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { supabaseEnv } from "./env";
 
 /** Paths reachable without an authenticated session. */
-const PUBLIC_PATHS = ["/login"];
+const PUBLIC_PATHS = ["/login", "/offline"];
 
 /**
  * Refreshes the Supabase auth session on each request, keeps cookies in sync,
@@ -32,10 +32,15 @@ export async function updateSession(request: NextRequest) {
   });
 
   // Touch the user to trigger token refresh. Keep this immediately after client
-  // creation; the result also drives the redirect below.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // creation; the result also drives the redirect below. A stale/invalid refresh
+  // token (e.g. after a DB reset) makes this throw — treat that as logged out.
+  let user = null;
+  try {
+    const result = await supabase.auth.getUser();
+    user = result.data.user;
+  } catch {
+    user = null;
+  }
 
   const { pathname } = request.nextUrl;
   const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
@@ -43,7 +48,12 @@ export async function updateSession(request: NextRequest) {
   if (!user && !isPublic) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
-    return NextResponse.redirect(loginUrl);
+    const redirect = NextResponse.redirect(loginUrl);
+    // Drop any stale Supabase auth cookies so the bad token doesn't loop.
+    for (const cookie of request.cookies.getAll()) {
+      if (cookie.name.startsWith("sb-")) redirect.cookies.delete(cookie.name);
+    }
+    return redirect;
   }
 
   return response;

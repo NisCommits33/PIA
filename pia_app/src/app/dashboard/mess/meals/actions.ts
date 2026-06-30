@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/utils/supabase/server";
 import { requireMessAdmin } from "@/lib/roles";
-import { adStringToBs } from "@/lib/bs-date";
+import { adStringToBs, formatBs } from "@/lib/bs-date";
 import { SHIFTS, type ShiftType } from "@/lib/types";
+import { logActivity } from "@/lib/activity";
 
 export type BulkState = { error?: string; ok?: string } | undefined;
 
@@ -62,6 +63,14 @@ export async function bulkLogMeals(_prev: BulkState, formData: FormData): Promis
   revalidatePath("/dashboard/mess/meals");
   revalidatePath("/dashboard/mess");
   revalidatePath("/dashboard");
+
+  const shiftLabel = SHIFTS.find((s) => s.value === shift)?.label ?? shift;
+  await logActivity({
+    action: "meal.bulk_logged",
+    summary: `Logged ${rows.length} ${rows.length === 1 ? "meal" : "meals"} — ${shiftLabel} · ${formatBs(bs)}`,
+    entityType: "meal",
+  });
+
   return {
     ok: `Logged meals for ${rows.length} ${rows.length === 1 ? "staff member" : "staff"}.`,
   };
@@ -71,8 +80,31 @@ export async function bulkLogMeals(_prev: BulkState, formData: FormData): Promis
 export async function adminRemoveMeal(id: string): Promise<void> {
   await requireMessAdmin();
   const supabase = await createClient();
+
+  const { data: meal } = await supabase
+    .from("meal_logs")
+    .select("staff_id, shift, bs_year, bs_month, bs_day")
+    .eq("id", id)
+    .maybeSingle();
+
   await supabase.from("meal_logs").delete().eq("id", id);
   revalidatePath("/dashboard/mess/meals");
   revalidatePath("/dashboard/mess");
   revalidatePath("/dashboard");
+
+  if (meal) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", meal.staff_id)
+      .maybeSingle();
+    const name = profile?.full_name || "a staff member";
+    const shiftLabel = SHIFTS.find((s) => s.value === meal.shift)?.label ?? meal.shift;
+    await logActivity({
+      action: "meal.removed",
+      summary: `Removed ${name}'s ${shiftLabel} meal · ${formatBs({ year: meal.bs_year, month: meal.bs_month, day: meal.bs_day })}`,
+      entityType: "meal",
+      entityId: id,
+    });
+  }
 }

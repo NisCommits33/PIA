@@ -20,9 +20,14 @@ export type SessionContext = {
  */
 export const getSessionContext = cache(async (): Promise<SessionContext | null> => {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const result = await supabase.auth.getUser();
+    user = result.data.user;
+  } catch {
+    // Stale/invalid session (e.g. after a DB reset) — treat as logged out.
+    return null;
+  }
   if (!user) return null;
 
   const [{ data: roleRows }, { data: profile }] = await Promise.all([

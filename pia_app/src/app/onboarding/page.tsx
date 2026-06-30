@@ -24,7 +24,11 @@ export default async function OnboardingPage() {
 
         <Card>
           <CardBody className="p-6">
-            <OnboardingForm defaultName={ctx.profile?.full_name ?? undefined} />
+            <OnboardingForm
+              defaultName={ctx.profile?.full_name ?? undefined}
+              defaultDepartment={ctx.profile?.department ?? undefined}
+              defaultShift={ctx.profile?.default_shift ?? undefined}
+            />
           </CardBody>
         </Card>
       </div>

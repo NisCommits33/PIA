@@ -8,6 +8,7 @@ import { BottomNav } from "@/components/bottom-nav";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ToastProvider } from "@/components/ui/toast";
+import { FeedbackWidget } from "@/components/feedback/feedback-widget";
 
 function roleLabel(roles: string[]): string {
   if (roles.includes("super_admin")) return "Super admin";
@@ -74,6 +75,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-6 sm:pb-6">{children}</main>
 
         <BottomNav items={nav} />
+        <FeedbackWidget />
       </div>
     </ToastProvider>
   );

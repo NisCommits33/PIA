@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { requireMessAdmin, requireSuperAdmin } from "@/lib/roles";
+import { logActivity } from "@/lib/activity";
+import { DEPARTMENTS, SHIFTS, type Department, type ShiftType } from "@/lib/types";
 
 export type CreateState = { error?: string; ok?: string } | undefined;
 
@@ -27,6 +29,12 @@ export async function createStaffAccount(
   // Username = the name lowercased with everything but letters/numbers stripped.
   const username = fullName.toLowerCase().replace(/[^a-z0-9]/g, "");
 
+  // Optional — pre-set so the staff member skips these during onboarding.
+  const deptRaw = String(formData.get("department") ?? "");
+  const shiftRaw = String(formData.get("default_shift") ?? "");
+  const department = DEPARTMENTS.some((d) => d.value === deptRaw) ? (deptRaw as Department) : null;
+  const defaultShift = SHIFTS.some((s) => s.value === shiftRaw) ? (shiftRaw as ShiftType) : null;
+
   if (fullName.length < 2) return { error: "Enter the staff member's name." };
   if (username.length < 3) return { error: "Name needs at least 3 letters or numbers." };
 
@@ -48,10 +56,20 @@ export async function createStaffAccount(
     };
   }
 
-  // The new-user trigger created the profile + staff role; set the name.
-  await admin.from("profiles").update({ full_name: fullName }).eq("id", data.user.id);
+  // The new-user trigger created the profile + staff role; set the name and any
+  // department/shift the admin pre-selected.
+  await admin
+    .from("profiles")
+    .update({ full_name: fullName, department, default_shift: defaultShift })
+    .eq("id", data.user.id);
 
   revalidateStaff();
+  await logActivity({
+    action: "account.created",
+    summary: `Created account ${username}${fullName ? ` (${fullName})` : ""}`,
+    entityType: "account",
+    entityId: data.user.id,
+  });
   return { ok: `Account created — username ${username}, password ${password}.` };
 }
 
@@ -98,5 +116,31 @@ export async function setActive(userId: string, active: boolean): Promise<void> 
   }
 
   await admin.from("profiles").update({ is_active: active }).eq("id", userId);
+  revalidateStaff();
+
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("full_name")
+    .eq("id", userId)
+    .maybeSingle();
+  await logActivity({
+    action: active ? "account.activated" : "account.deactivated",
+    summary: `${active ? "Activated" : "Deactivated"} ${profile?.full_name || "an account"}`,
+    entityType: "account",
+    entityId: userId,
+  });
+}
+
+/**
+ * Permanently delete a staff account (super_admin only). Removes the auth user;
+ * the profile, roles, meals, contributions, and leave cascade away via FKs.
+ */
+export async function deleteStaffAccount(userId: string): Promise<void> {
+  const ctx = await requireSuperAdmin();
+  // A super_admin cannot delete their own account.
+  if (userId === ctx.userId) return;
+
+  const admin = createAdminClient();
+  await admin.auth.admin.deleteUser(userId);
   revalidateStaff();
 }
