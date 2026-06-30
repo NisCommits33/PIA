@@ -6,6 +6,8 @@ import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { requireOnboardedUser, isMessAdmin } from "@/lib/roles";
 import { adStringToBs } from "@/lib/bs-date";
+import { formatNpr } from "@/lib/format";
+import { notify, messAdminIds } from "@/lib/notify";
 
 export type ExpenseState = { error?: string; ok?: string } | undefined;
 
@@ -95,6 +97,15 @@ export async function submitExpense(
     // Recorded expense feeds the mess overview / cost per meal immediately.
     revalidatePath("/dashboard/mess");
     revalidatePath("/dashboard");
+  } else {
+    // Staff submission needs review — ping the mess admins.
+    await notify({
+      recipientIds: await messAdminIds(),
+      title: "New expense to review",
+      body: `${item} · ${formatNpr(amount)}`,
+      link: "/dashboard/mess/expenses",
+      kind: "expense",
+    });
   }
 
   const base = admin ? "Expense recorded." : "Expense submitted for review.";

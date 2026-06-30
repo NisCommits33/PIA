@@ -7,6 +7,7 @@ import { requireMessAdmin } from "@/lib/roles";
 import { adStringToBs, formatBs } from "@/lib/bs-date";
 import { SHIFTS, type ShiftType } from "@/lib/types";
 import { logActivity } from "@/lib/activity";
+import { notify } from "@/lib/notify";
 
 export type BulkState = { error?: string; ok?: string } | undefined;
 
@@ -69,6 +70,14 @@ export async function bulkLogMeals(_prev: BulkState, formData: FormData): Promis
     action: "meal.bulk_logged",
     summary: `Logged ${rows.length} ${rows.length === 1 ? "meal" : "meals"} — ${shiftLabel} · ${formatBs(bs)}`,
     entityType: "meal",
+  });
+  // Tell each staff member their meal was logged for them.
+  await notify({
+    recipientIds: validIds,
+    title: "Meal logged for you",
+    body: `A mess admin logged your ${shiftLabel} meal for ${formatBs(bs)}.`,
+    link: "/dashboard",
+    kind: "meal",
   });
 
   return {

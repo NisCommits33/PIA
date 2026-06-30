@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Flame, CircleUser } from "lucide-react";
 
 import { requireOnboardedUser, isMessAdmin } from "@/lib/roles";
+import { createClient } from "@/utils/supabase/server";
 import { signOut } from "@/lib/session-actions";
 import { SubNav, type NavItem } from "@/components/sub-nav";
 import { BottomNav } from "@/components/bottom-nav";
@@ -9,6 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ToastProvider } from "@/components/ui/toast";
 import { FeedbackWidget } from "@/components/feedback/feedback-widget";
+import {
+  NotificationBell,
+  type NotificationItem,
+} from "@/components/notifications/notification-bell";
 
 function roleLabel(roles: string[]): string {
   if (roles.includes("super_admin")) return "Super admin";
@@ -38,6 +43,33 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // Read-only mess transparency — visible to everyone. (Profile lives in the header.)
   nav.push({ href: "/dashboard/mess-book", label: "Mess book", icon: "messbook" });
 
+  const supabase = await createClient();
+  const { data: notifRows } = await supabase
+    .from("notifications")
+    .select("id, title, body, link, read_at, created_at")
+    .eq("recipient_id", ctx.userId)
+    .order("created_at", { ascending: false })
+    .limit(20);
+  const notifications: NotificationItem[] = (
+    (notifRows as
+      | {
+          id: string;
+          title: string;
+          body: string | null;
+          link: string | null;
+          read_at: string | null;
+          created_at: string;
+        }[]
+      | null) ?? []
+  ).map((n) => ({
+    id: n.id,
+    title: n.title,
+    body: n.body,
+    link: n.link,
+    read: n.read_at != null,
+    createdAt: n.created_at,
+  }));
+
   return (
     <ToastProvider>
       <div className="flex min-h-dvh flex-col bg-background">
@@ -51,6 +83,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <Badge tone="accent">{roleLabel(ctx.roles)}</Badge>
             </div>
             <div className="flex items-center gap-2 text-sm">
+              <NotificationBell userId={ctx.userId} initial={notifications} />
               <Link
                 href="/dashboard/profile"
                 aria-label="Your profile"

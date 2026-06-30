@@ -7,6 +7,7 @@ import { requireMessAdmin } from "@/lib/roles";
 import { adStringToBs } from "@/lib/bs-date";
 import { formatNpr } from "@/lib/format";
 import { logActivity } from "@/lib/activity";
+import { notify } from "@/lib/notify";
 
 export type EditExpenseState = { error?: string; ok?: string } | undefined;
 
@@ -24,7 +25,7 @@ async function setStatus(id: string, status: "approved" | "rejected") {
     .from("expenses")
     .update({ status, reviewed_by: ctx.userId, reviewed_at: new Date().toISOString() })
     .eq("id", id)
-    .select("item, amount")
+    .select("item, amount, created_by")
     .maybeSingle();
   revalidateMess();
   if (data) {
@@ -34,6 +35,15 @@ async function setStatus(id: string, status: "approved" | "rejected") {
       entityType: "expense",
       entityId: id,
     });
+    if (data.created_by) {
+      await notify({
+        recipientIds: [data.created_by],
+        title: status === "approved" ? "Expense approved" : "Expense rejected",
+        body: `${data.item} · ${formatNpr(data.amount)}`,
+        link: "/dashboard/expenses",
+        kind: "expense",
+      });
+    }
   }
 }
 
@@ -58,7 +68,7 @@ export async function markReimbursed(id: string): Promise<void> {
     })
     .eq("id", id)
     .eq("status", "approved")
-    .select("item, amount")
+    .select("item, amount, created_by")
     .maybeSingle();
   revalidateMess();
   if (data) {
@@ -68,6 +78,15 @@ export async function markReimbursed(id: string): Promise<void> {
       entityType: "expense",
       entityId: id,
     });
+    if (data.created_by) {
+      await notify({
+        recipientIds: [data.created_by],
+        title: "Expense reimbursed",
+        body: `${data.item} · ${formatNpr(data.amount)}`,
+        link: "/dashboard/expenses",
+        kind: "expense",
+      });
+    }
   }
 }
 

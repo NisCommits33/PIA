@@ -7,6 +7,7 @@ import { requireMessAdmin } from "@/lib/roles";
 import { formatNpr } from "@/lib/format";
 import { formatBsMonth } from "@/lib/bs-date";
 import { logActivity } from "@/lib/activity";
+import { notify } from "@/lib/notify";
 
 /** Record (or update) a staff member's monthly advance. */
 export async function recordContribution(staffId: string, formData: FormData): Promise<void> {
@@ -43,9 +44,17 @@ export async function recordContribution(staffId: string, formData: FormData): P
     .eq("id", staffId)
     .maybeSingle();
   const name = profile?.full_name || "a staff member";
+  const monthLabel = formatBsMonth({ year: bsYear, month: bsMonth });
   await logActivity({
     action: "contribution.recorded",
-    summary: `Set ${name}'s advance to ${formatNpr(amount)} — ${formatBsMonth({ year: bsYear, month: bsMonth })}`,
+    summary: `Set ${name}'s advance to ${formatNpr(amount)} — ${monthLabel}`,
     entityType: "contribution",
+  });
+  await notify({
+    recipientIds: [staffId],
+    title: "Advance recorded",
+    body: `Your advance for ${monthLabel} is ${formatNpr(amount)}.`,
+    link: "/dashboard",
+    kind: "contribution",
   });
 }
