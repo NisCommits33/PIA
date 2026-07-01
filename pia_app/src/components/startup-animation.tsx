@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { BrandMark } from "@/components/brand-mark";
+
 let hasPlayedStartupAnimation = false;
 
 function isStandalonePwa() {
@@ -45,12 +47,10 @@ export function StartupAnimation() {
       className="startup-screen fixed inset-0 z-50 grid place-items-center bg-background"
       role="status"
     >
-      <div className="startup-mark" aria-hidden="true">
-        <div className="startup-glow" />
-        <div className="startup-flame startup-flame-outer" />
-        <div className="startup-flame startup-flame-inner" />
-        <div className="startup-flame startup-flame-core" />
-        <div className="startup-base" />
+      <div className="startup-mark">
+        <div className="startup-glow" aria-hidden="true" />
+        <BrandMark className="startup-logo" />
+        <div className="startup-sheen" aria-hidden="true" />
       </div>
       <div className="startup-title">PIA ARFF</div>
     </div>

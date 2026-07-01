@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Flame, CircleUser } from "lucide-react";
+import { CircleUser } from "lucide-react";
 
 import { requireOnboardedUser, isMessAdmin } from "@/lib/roles";
 import { createClient } from "@/utils/supabase/server";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ToastProvider } from "@/components/ui/toast";
 import { FeedbackWidget } from "@/components/feedback/feedback-widget";
+import { BrandMark } from "@/components/brand-mark";
 import {
   NotificationBell,
   type NotificationItem,
@@ -78,9 +79,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
             <div className="flex items-center gap-2">
-              <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-on-primary">
-                <Flame aria-hidden className="size-5" />
-              </span>
+              <BrandMark className="size-8 rounded-lg shadow-sm" />
               <span className="text-lg font-bold tracking-tight text-foreground">PIA ARFF</span>
               <Badge tone="accent">{roleLabel(ctx.roles)}</Badge>
             </div>
