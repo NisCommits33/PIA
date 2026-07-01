@@ -13,7 +13,7 @@ export default async function LoginPage() {
     <main className="flex flex-1 items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center text-center">
-          <BrandMark className="size-14 rounded-2xl shadow-sm" />
+          <BrandMark className="size-20 object-contain" />
           <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">PIA ARFF</h1>
           <p className="mt-1 text-sm text-muted">Pokhara Airport ARFF — staff sign in</p>
         </div>

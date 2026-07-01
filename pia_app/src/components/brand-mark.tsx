@@ -6,7 +6,7 @@ export function BrandMark({ className }: { className?: string }) {
   return (
     <Image
       aria-hidden="true"
-      className={cn("block", className)}
+      className={cn("block object-contain", className)}
       alt=""
       height={128}
       src="/pia-arff-logo.png"

@@ -79,7 +79,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
             <div className="flex items-center gap-2">
-              <BrandMark className="size-8 rounded-lg shadow-sm" />
+              <BrandMark className="size-9 object-contain" />
               <span className="text-lg font-bold tracking-tight text-foreground">PIA ARFF</span>
               <Badge tone="accent">{roleLabel(ctx.roles)}</Badge>
             </div>
