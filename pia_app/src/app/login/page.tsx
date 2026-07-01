@@ -16,8 +16,8 @@ export default async function LoginPage() {
           <span className="flex size-12 items-center justify-center rounded-xl bg-primary text-on-primary shadow-sm">
             <Flame aria-hidden className="size-7" />
           </span>
-          <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">Station Ops</h1>
-          <p className="mt-1 text-sm text-muted">Pokhara Fire Station — staff sign in</p>
+          <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">PIA ARFF</h1>
+          <p className="mt-1 text-sm text-muted">Pokhara Airport ARFF — staff sign in</p>
         </div>
 
         <Card>

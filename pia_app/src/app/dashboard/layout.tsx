@@ -81,7 +81,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-on-primary">
                 <Flame aria-hidden className="size-5" />
               </span>
-              <span className="text-lg font-bold tracking-tight text-foreground">Station Ops</span>
+              <span className="text-lg font-bold tracking-tight text-foreground">PIA ARFF</span>
               <Badge tone="accent">{roleLabel(ctx.roles)}</Badge>
             </div>
             <div className="flex items-center gap-2 text-sm">

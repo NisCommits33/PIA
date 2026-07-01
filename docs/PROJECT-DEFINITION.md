@@ -1,4 +1,4 @@
-# Project Definition — Pokhara Fire Station Internal App
+# Project Definition — PIA ARFF
 
 > Step 1 of the build: define the thing before any code. This is the source of truth
 > for scope, users, requirements, and the data model. Edit freely — nothing here is
@@ -6,13 +6,13 @@
 
 Status: **CONFIRMED (v1 scope)** — 2026-06-23
 
-UI/brand name: **TBD** (placeholder "Station Ops" in code until decided).
+UI/brand name: **PIA ARFF**.
 
 ---
 
 ## 1. Problem & purpose
 
-Pokhara Fire Station staff need a simple internal app to (a) track the shared **mess
+Pokhara Airport ARFF staff need a simple internal app to (a) track the shared **mess
 (kitchen) finances** fairly and transparently, and (b) keep an informational **record of
 staff leave**. Today this is presumably done on paper/spreadsheets, which is error-prone,
 hard to audit, and hard to share.
@@ -169,7 +169,7 @@ expenses approved/rejected after meals are logged (figures shift — that's expe
 1. **Scope:** both modules (Mess Finance + Leave) in v1. ✅
 2. **Staff management:** super_admin-only. ✅
 3. **Meal value:** simple "ate / didn't" per shift (no plate counts). ✅
-4. **App/brand name:** TBD — use placeholder "Station Ops" in code until decided.
+4. **App/brand name:** PIA ARFF.
 5. **Billing:** advance deposit (Rs 3,000) reconciled at close against computed bill
    (meals × cost-per-meal); bill is computed, not hand-entered. ✅
 6. **Live cost per meal** on the dashboard daily, based on **approved expenses only**. ✅

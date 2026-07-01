@@ -1,6 +1,6 @@
-# PIA — Pokhara Fire Station Internal App
+# PIA ARFF
 
-Internal app for Pokhara Fire Station: a **Mess Finance Tracker** and a **Leave
+Internal app for Pokhara Airport ARFF: a **Mess Finance Tracker** and a **Leave
 Information Tracker**. See [docs/PROJECT-DEFINITION.md](docs/PROJECT-DEFINITION.md) for
 the full scope, roles, domain model, and billing rules.
 

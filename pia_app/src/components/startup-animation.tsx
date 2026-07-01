@@ -41,7 +41,7 @@ export function StartupAnimation() {
 
   return (
     <div
-      aria-label="Opening Station Ops"
+      aria-label="Opening PIA ARFF"
       className="startup-screen fixed inset-0 z-50 grid place-items-center bg-background"
       role="status"
     >
@@ -52,7 +52,7 @@ export function StartupAnimation() {
         <div className="startup-flame startup-flame-core" />
         <div className="startup-base" />
       </div>
-      <div className="startup-title">Station Ops</div>
+      <div className="startup-title">PIA ARFF</div>
     </div>
   );
 }

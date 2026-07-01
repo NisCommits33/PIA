@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
-  Station Ops design system — "Data-Dense Dashboard" (light mode).
+  PIA ARFF design system — "Data-Dense Dashboard" (light mode).
   Tokens are defined as CSS variables on :root, then mapped into Tailwind v4's
   theme so semantic utilities (bg-primary, text-muted, border-border, …) work.
 */

@@ -19,13 +19,13 @@ const firaCode = Fira_Code({
 });
 
 export const metadata: Metadata = {
-  title: "Station Ops — Pokhara Fire Station",
-  description: "Mess finance and leave tracking for Pokhara Fire Station staff.",
-  applicationName: "Station Ops",
+  title: "PIA ARFF",
+  description: "Mess finance and leave tracking for Pokhara Airport ARFF staff.",
+  applicationName: "PIA ARFF",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Station Ops",
+    title: "PIA ARFF",
   },
 };
 

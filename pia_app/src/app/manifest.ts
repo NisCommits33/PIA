@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Station Ops — Pokhara Fire Station",
-    short_name: "Station Ops",
-    description: "Mess finance and leave tracking for Pokhara Fire Station staff.",
+    name: "PIA ARFF",
+    short_name: "PIA ARFF",
+    description: "Mess finance and leave tracking for Pokhara Airport ARFF staff.",
     start_url: "/",
     scope: "/",
     display: "standalone",

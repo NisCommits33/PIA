@@ -1,9 +1,9 @@
-// Service worker for the Station Ops PWA.
+// Service worker for the PIA ARFF PWA.
 // Provides installability and a small app-shell offline fallback. Auth- and
 // data-bearing requests are always served network-first so we never show stale
 // finance/leave data; only same-origin GET navigations get an offline fallback.
 
-const CACHE = "station-ops-v1";
+const CACHE = "pia-arff-v1";
 const OFFLINE_URL = "/offline";
 const PRECACHE = [OFFLINE_URL, "/icon-192.png", "/icon-512.png"];
 
@@ -45,9 +45,9 @@ self.addEventListener("push", (event) => {
   try {
     data = event.data ? event.data.json() : {};
   } catch {
-    data = { title: "Station Ops", body: event.data ? event.data.text() : "" };
+    data = { title: "PIA ARFF", body: event.data ? event.data.text() : "" };
   }
-  const title = data.title || "Station Ops";
+  const title = data.title || "PIA ARFF";
   const options = {
     body: data.body || "",
     icon: "/icon-192.png",
